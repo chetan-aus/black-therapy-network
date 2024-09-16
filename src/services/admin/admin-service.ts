@@ -87,12 +87,12 @@ export const getClientsService = async (payload: any) => {
     const clients = await clientModel.find(query).sort(sort).skip(offset).limit(limit)
     if (clients.length) {
         // Fetch appointments for the retrieved clients
-        const clientAppointments = await appointmentRequestModel.find({ 
-            clientId: { $in: clients.map(c => c._id) } 
+        const clientAppointments = await appointmentRequestModel.find({
+            clientId: { $in: clients.map(c => c._id) }
         }).sort({ appointmentDate: -1 });
 
         // Create a map of client IDs to their appointments
-        const appointmentMap = clientAppointments.reduce((map:any, appointment:any) => {
+        const appointmentMap = clientAppointments.reduce((map: any, appointment: any) => {
             if (!map[appointment.clientId.toString()]) {
                 map[appointment.clientId.toString()] = [];
             }
@@ -145,20 +145,51 @@ export const updateClientStatusService = async (id: string, res: Response) => {
 
 //Therapist Services
 export const getTherapistsService = async (payload: any) => {
-    const page = parseInt(payload.page as string) || 1
-    const limit = parseInt(payload.limit as string) || 10
-    const offset = (page - 1) * limit
-    const { query, sort } = queryBuilder(payload, ['firstName', 'lastName'])
+    const page = parseInt(payload.page as string) || 1;
+    const limit = parseInt(payload.limit as string) || 10;
+    const offset = (page - 1) * limit;
+    const { query, sort } = queryBuilder(payload, ['firstName', 'lastName']);
 
-    const totalDataCount = Object.keys(query).length < 1 ? await therapistModel.countDocuments() : await therapistModel.countDocuments(query)
-    const result = await therapistModel.find(query).sort(sort).skip(offset).limit(limit)
-    if (result.length) return {
-        data: result,
-        page,
-        limit,
-        success: true,
-        total: totalDataCount
-    }
+    const totalDataCount = await therapistModel.countDocuments(query);
+    const therapists = await therapistModel.find(query).sort(sort).skip(offset).limit(limit);
+
+    if (therapists.length) {
+        const therapistIds = therapists.map(t => t._id);
+
+        const appointments = await appointmentRequestModel.find({
+            $or: [
+                { therapistId: { $in: therapistIds } },
+                { peerSupportIds: { $in: therapistIds } }
+            ]
+        }).sort({ appointmentDate: -1 });
+
+        const appointmentMap = appointments.reduce((map:any, appointment:any) => {
+            const therapistId = appointment.therapistId
+            const addAppointmentToMap = (id:any) => {
+                if (!map[id.toString()]) {
+                    map[id.toString()] = [];
+                }
+                map[id.toString()].push(appointment);
+            };
+
+            addAppointmentToMap(therapistId);
+            appointment.peerSupportIds.forEach(addAppointmentToMap);
+            return map;
+        }, {});
+
+        const therapistsWithAppointments = therapists.map(therapist => {
+            const therapistObject = therapist.toObject() as any
+            therapistObject.appointments = appointmentMap[therapist._id.toString()] || [];
+            return therapistObject;
+        })
+        return {
+            data: therapistsWithAppointments,
+            page,
+            limit,
+            success: true,
+            total: totalDataCount
+        }
+    } 
     else {
         return {
             data: [],
@@ -166,8 +197,16 @@ export const getTherapistsService = async (payload: any) => {
             limit,
             success: false,
             total: 0
-        }
+        };
     }
+}
+
+export const updateTherapistService = async (payload: any, res: Response) => {
+    const { id, ...rest } = payload
+    const therapist = await onboardingApplicationModel.find({ therapistId: id })
+    if (!therapist) return errorResponseHandler("Therapist not found", httpStatusCode.NOT_FOUND, res)
+    const updatedTherapist = await onboardingApplicationModel.findOneAndUpdate({ therapistId: id }, rest, { new: true })
+    return { success: true, message: "Therapist updated successfully", data: updatedTherapist }
 }
 
 export const deleteTherapistService = async (id: string, res: Response) => {
@@ -175,3 +214,4 @@ export const deleteTherapistService = async (id: string, res: Response) => {
     if (!therapist) return errorResponseHandler("Therapist not found", httpStatusCode.NOT_FOUND, res)
     return { success: true, message: "Therapist deleted successfully" }
 }
+

@@ -14,11 +14,13 @@ import {
     deleteTherapistService,
     deleteClientService,
     updateClientStatusService,
+    updateTherapistService,
     // updateDashboardStatsService 
 } from "../../services/admin/admin-service";
 import { errorParser } from "../../lib/errors/error-response-handler";
 import { httpStatusCode } from "../../lib/constant";
 import { z } from "zod";
+import { onboardingApplicationSchema, updateTherapistSchema } from "../../validation/therapist-user";
 // import jwt, { JwtPayload } from "jsonwebtoken";
 // import { dashboardSchema } from "../../validation/dashboard";
 
@@ -128,6 +130,8 @@ export const getDashboardStats = async (req: Request, res: Response) => {
     }
 }
 
+
+// Clients
 export const getClients = async (req: Request, res: Response) => {
     try {
         const response = await getClientsService(req.query)
@@ -149,13 +153,35 @@ export const deleteClient = async (req: Request, res: Response) => {
 }
 
 
+export const updateClientStatus = async (req: Request, res: Response) => {
+    try {
+        const response = await updateClientStatusService(req.params.id, res)
+        return res.status(httpStatusCode.OK).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
+        
+    }
+}
 
 
 
-
+// Therapists
 export const getTherapists = async (req: Request, res: Response) => {
     try {
         const response = await getTherapistsService(req.query)
+        return res.status(httpStatusCode.OK).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
+    }
+}
+
+export const updateTherapist = async(req: Request, res: Response)=> {
+    const validation = updateTherapistSchema.safeParse(req.body)
+    if (!validation.success) return res.status(httpStatusCode.BAD_REQUEST).json({ success: false, message: formatZodErrors(validation.error) })
+    try {
+        const response = await updateTherapistService({id: req.params.id, ...req.body}, res)
         return res.status(httpStatusCode.OK).json(response)
     } catch (error: any) {
         const { code, message } = errorParser(error)
@@ -171,19 +197,8 @@ export const deleteTherapist = async (req: Request, res: Response) => {
         const { code, message } = errorParser(error)
         return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
     }
-
 }
 
-export const updateClientStatus = async (req: Request, res: Response) => {
-    try {
-        const response = await updateClientStatusService(req.params.id, res)
-        return res.status(httpStatusCode.OK).json(response)
-    } catch (error: any) {
-        const { code, message } = errorParser(error)
-        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
-        
-    }
-}
 
 // export const updateDashboardStats = async (req: Request, res: Response) => {
 //     const validation = dashboardSchema.safeParse(req.body)

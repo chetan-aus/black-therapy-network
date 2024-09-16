@@ -18,7 +18,7 @@ export const therapistLoginSchema = z.object({
     message: "Bad payload present in the data"
 })
 
-export const onboardingApplicationSchema = z.object({
+const baseOnboardingApplicationSchema = z.object({
     email: z.string().email(),
     companyProvidedEmail: z.boolean(),
     providerType: z.string().min(1),
@@ -62,10 +62,14 @@ export const onboardingApplicationSchema = z.object({
     availableEndTime: z.string().min(1),
     daysOfTheWeek: z.array(z.string().min(1)),
     backgroundCheckCompleted: z.boolean(),
-    
 }).strict({
     message: "Bad payload present in the data"
-})
+});
+
+export const onboardingApplicationSchema = baseOnboardingApplicationSchema;
+
+export const updateTherapistSchema = baseOnboardingApplicationSchema.partial()
+
 export const userOTPVeificationSchema = z.object({
     email : z.string().email(),
     otp: z.string().length(6),

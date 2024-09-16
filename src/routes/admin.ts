@@ -10,6 +10,7 @@ import {
     deleteClient,
     deleteTherapist,
     updateClientStatus,
+    updateTherapist
     //  updateDashboardStats
 } from "../controllers/admin/admin";
 // import { checkAdminAuth } from "../middleware/check-auth";
@@ -30,7 +31,7 @@ router.get("/clients", getClients)
 router.route("/clients/:id").delete(deleteClient).patch(updateClientStatus)
 
 router.get("/therapists", getTherapists)
-router.delete("/therapists/:id", deleteTherapist)
+router.route("/therapists/:id").delete(deleteTherapist).put(updateTherapist)
 
 router.route("/wellness").get(getWellness).post(addWellness)
 router.delete("/delete-wellness/:id", deleteWellness)
