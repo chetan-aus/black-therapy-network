@@ -3,7 +3,7 @@ import cors from "cors";
 // import cookieParser from "cookie-parser";
 
 import path from "path";
-import connectDB from "./config/db";
+import connectDB from "./configF/db";
 import { admin, client, therapist } from "./routes";
 import { checkValidAdminRole } from "./utils";
 

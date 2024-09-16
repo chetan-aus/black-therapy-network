@@ -1,6 +1,6 @@
 import { Router } from "express";
 // import { checkAdminAuth } from "../middleware/check-auth";
-import { upload } from "../config/multer";
+import { upload } from "../configF/multer";
 import { checkMulter } from "../lib/errors/error-response-handler"
 import { login, signup, onBoarding, getTherapistVideos,forgotPassword, newPassswordAfterEmailSent } from "../controllers/therapist/therapist";
 const router = Router();

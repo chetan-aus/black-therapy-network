@@ -13,7 +13,7 @@ import {
     //  updateDashboardStats
 } from "../controllers/admin/admin";
 // import { checkAdminAuth } from "../middleware/check-auth";
-import { upload } from "../config/multer";
+import { upload } from "../configF/multer";
 import { checkMulter } from "../lib/errors/error-response-handler"
 import { addWellness, deleteWellness, getWellness } from "../controllers/admin/wellness"
 import { addUser, deleteUser, getUsers } from "../controllers/admin/user"

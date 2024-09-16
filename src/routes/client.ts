@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { upload } from "../config/multer";
+import { upload } from "../configF/multer";
 import { checkMulter } from "../lib/errors/error-response-handler"
 import { login, signup, getClientVideos, forgotPassword, newPassswordAfterEmailSent, passwordReset, getClientInfo, editClientInfo } from "../controllers/client/client";
 import { requestAppointment, getClientAppointments } from "../controllers/appointments/appointments";
