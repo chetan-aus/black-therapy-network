@@ -3,6 +3,7 @@ import { Router } from "express";
 import { upload } from "../configF/multer";
 import { checkMulter } from "../lib/errors/error-response-handler"
 import { login, signup, onBoarding, getTherapistVideos, forgotPassword, getTherapistClients, newPassswordAfterEmailSent, getTherapistDashboardStats } from "../controllers/therapist/therapist";
+import { addPaymentRequest, getPaymentRequestByTherapistId } from "../controllers/payment-request/payment-request";
 const router = Router();
 
 router.post("/signup", signup)
@@ -15,6 +16,9 @@ router.route("/dashboard/:id").get(getTherapistDashboardStats)
 
 router.get("/:id/clients", getTherapistClients)
 router.get("/videos", getTherapistVideos)
+
+router.post("/payment-requests", addPaymentRequest)
+router.get("/payment-requests/:id", getPaymentRequestByTherapistId)
 
 // router.get("/verify-session", verifySession);
 // router.patch("/update-password", passwordReset)

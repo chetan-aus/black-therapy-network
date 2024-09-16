@@ -4,7 +4,6 @@ const paymentRequestSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ["pending", "approved", "rejected"],
-        required: true,
         default: "pending"
     },
     requestType: {

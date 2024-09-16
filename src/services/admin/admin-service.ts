@@ -150,7 +150,7 @@ export const getTherapistsService = async (payload: any) => {
     const offset = (page - 1) * limit;
     const { query, sort } = queryBuilder(payload, ['firstName', 'lastName']);
 
-    const totalDataCount = await therapistModel.countDocuments(query);
+    const totalDataCount = Object.keys(query).length < 1 ? await therapistModel.countDocuments() : await therapistModel.countDocuments(query)
     const therapists = await therapistModel.find(query).sort(sort).skip(offset).limit(limit);
 
     if (therapists.length) {
@@ -163,9 +163,9 @@ export const getTherapistsService = async (payload: any) => {
             ]
         }).sort({ appointmentDate: -1 });
 
-        const appointmentMap = appointments.reduce((map:any, appointment:any) => {
+        const appointmentMap = appointments.reduce((map: any, appointment: any) => {
             const therapistId = appointment.therapistId
-            const addAppointmentToMap = (id:any) => {
+            const addAppointmentToMap = (id: any) => {
                 if (!map[id.toString()]) {
                     map[id.toString()] = [];
                 }
@@ -189,7 +189,7 @@ export const getTherapistsService = async (payload: any) => {
             success: true,
             total: totalDataCount
         }
-    } 
+    }
     else {
         return {
             data: [],

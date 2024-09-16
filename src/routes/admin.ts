@@ -10,7 +10,7 @@ import {
     deleteClient,
     deleteTherapist,
     updateClientStatus,
-    updateTherapist
+    updateTherapist,
     //  updateDashboardStats
 } from "../controllers/admin/admin";
 // import { checkAdminAuth } from "../middleware/check-auth";
@@ -19,6 +19,7 @@ import { checkMulter } from "../lib/errors/error-response-handler"
 import { addWellness, deleteWellness, getWellness } from "../controllers/admin/wellness"
 import { addUser, deleteUser, getUsers } from "../controllers/admin/user"
 import { getAppointments, updateAppointmentStatus } from "../controllers/appointments/appointments";
+import { getAllPaymentRequests } from "../controllers/payment-request/payment-request";
 
 const router = Router();
 
@@ -38,6 +39,8 @@ router.delete("/delete-wellness/:id", deleteWellness)
 
 router.route("/users").get(getUsers).post(addUser)
 router.delete("/users/:id", deleteUser)
+
+router.get("/payment-requests", getAllPaymentRequests)
 
 // router.get("/verify-session", verifySession);
 // router.patch("/update-password", passwordReset)
