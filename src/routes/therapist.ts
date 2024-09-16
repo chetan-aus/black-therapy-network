@@ -2,7 +2,7 @@ import { Router } from "express";
 // import { checkAdminAuth } from "../middleware/check-auth";
 import { upload } from "../configF/multer";
 import { checkMulter } from "../lib/errors/error-response-handler"
-import { login, signup, onBoarding, getTherapistVideos,forgotPassword, newPassswordAfterEmailSent } from "../controllers/therapist/therapist";
+import { login, signup, onBoarding, getTherapistVideos, forgotPassword, getTherapistClients, newPassswordAfterEmailSent, getTherapistDashboardStats } from "../controllers/therapist/therapist";
 const router = Router();
 
 router.post("/signup", signup)
@@ -11,6 +11,9 @@ router.post("/onboarding", upload.single("profilePic"), checkMulter, onBoarding)
 router.patch("/forgot-password", forgotPassword)
 router.patch("/new-password-email-sent", newPassswordAfterEmailSent)
 
+router.route("/dashboard/:id").get(getTherapistDashboardStats)
+
+router.get("/:id/clients", getTherapistClients)
 router.get("/videos", getTherapistVideos)
 
 // router.get("/verify-session", verifySession);
@@ -21,7 +24,6 @@ router.get("/videos", getTherapistVideos)
 // router.get("/info", getAdminInfo)
 
 // Protected routes
-// router.route("/dashboard").get(getDashboardStats).put(updateDashboardStats);
 // router.route("/card").post(upload.single("image"), checkMulter, createCard).get(getCards)
 // router.route("/card/:id").delete(deleteACard).patch(changeCardStatus)
 // router.route("/cards-per-spinner").get(getCardsPerSpinner).patch(updateCardsPerSpinner)

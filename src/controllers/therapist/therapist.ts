@@ -3,7 +3,7 @@ import { httpStatusCode } from "../../lib/constant"
 import { errorParser } from "../../lib/errors/error-response-handler"
 import { formatZodErrors } from "../../validation/format-zod-errors"
 import { userOTPVeificationSchema, therapistSignupSchema, therapistLoginSchema, onboardingApplicationSchema } from "../../validation/therapist-user"
-import { loginService, onBoardingService, signupService, getTherapistVideosService, forgotPasswordService, newPassswordAfterEmailSentService } from "../../services/therapist/therapist"
+import { loginService, onBoardingService, signupService, getTherapistVideosService, forgotPasswordService, newPassswordAfterEmailSentService, getTherapistDashboardStatsService, getTherapistClientsService} from "../../services/therapist/therapist"
 import { z } from "zod"
 import mongoose from "mongoose"
 
@@ -79,6 +79,29 @@ export const newPassswordAfterEmailSent = async (req: Request, res: Response) =>
 export const getTherapistVideos = async (req: Request, res: Response) => {
     try {
         const response = await getTherapistVideosService()
+        return res.status(httpStatusCode.OK).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
+    }
+}
+
+
+// Dashboard stats
+export const getTherapistDashboardStats = async (req: Request, res: Response) => {
+    try {
+        const response = await getTherapistDashboardStatsService(req.params.id)
+        return res.status(httpStatusCode.OK).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
+    }
+}
+
+// Clients dedicated and as a peer support
+export const getTherapistClients = async (req: Request, res: Response) => {
+    try {
+        const response = await getTherapistClientsService({id: req.params.id, ...req.query})
         return res.status(httpStatusCode.OK).json(response)
     } catch (error: any) {
         const { code, message } = errorParser(error)

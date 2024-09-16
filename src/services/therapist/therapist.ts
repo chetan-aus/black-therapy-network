@@ -9,6 +9,9 @@ import { sendPasswordResetEmail } from "../../utils/mails/mail";
 import { passwordResetTokenModel } from "../../models/password-token-schema";
 import mongoose from "mongoose";
 import { wellnessModel } from "../../models/admin/wellness-schema";
+import { appointmentRequestModel } from "../../models/appointment-request-schema";
+import { queryBuilder } from "../../utils";
+import { clientModel } from "../../models/client/clients-schema";
 
 export const signupService = async (payload: any, res: Response) => {
     const { email } = payload
@@ -88,5 +91,62 @@ export const getTherapistVideosService = async () => {
         success: true,
         message: "Therapist videos fetched successfully",
         data: therapistWellnessVideos
+    }
+}
+
+//Dashboard stats service
+export const getTherapistDashboardStatsService = async (id: string) => {
+    const therapistAppointments = await appointmentRequestModel.find({
+        $or : [
+            { therapistId: { $eq: id } },
+            { peerSupportIds: { $in: [id] } }
+        ]
+    })
+    const totalClients = therapistAppointments.length
+
+    //TODO: add -> open task count, pending video count
+    return {
+        success: true,
+        message: "Dashboard stats fetched successfully",
+        data: {
+            totalClients
+        }
+    }
+}
+
+// Therapist as dedicated and peer support clients service
+export const getTherapistClientsService = async (payload: any) => {
+    const { id, ...rest } = payload
+    const page = parseInt(payload.page as string) || 1
+    const limit = parseInt(payload.limit as string) || 10
+    const offset = (page - 1) * limit
+    const { query, sort } = queryBuilder(payload, ['clientName'])
+    if(rest.assignedAs === 'dedicated') {
+        (query as any).therapistId = { $eq: id }
+    }
+    else if(rest.assignedAs === 'peer') {
+        (query as any).peerSupportIds = { $in: [id] }
+    }
+    const totalDataCount = Object.keys(query).length < 1 ?  await appointmentRequestModel.countDocuments() : await appointmentRequestModel.countDocuments(query)
+    const result = await appointmentRequestModel.find(query).sort(sort).skip(offset).limit(limit).populate({
+        path: 'clientId',
+        select: 'email phoneNumber',
+    });
+    
+    if (result.length) return {
+        success: true,
+        page,
+        limit,
+        total: totalDataCount,
+        data: result
+    }
+    else {
+        return {
+            data: [],
+            page,
+            limit,
+            success: false,
+            total: 0
+        }
     }
 }
