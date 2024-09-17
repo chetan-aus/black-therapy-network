@@ -1,14 +1,16 @@
 import express from "express"
 import cors from "cors";
 // import cookieParser from "cookie-parser";
-
 import path from "path";
 import connectDB from "./configF/db";
 import { admin, client, therapist } from "./routes";
 import { checkValidAdminRole } from "./utils";
+import { createServer } from 'http';
+import { Server } from "socket.io";
 
+const PORT = process.env.PORT || 8000
 const app = express()
-const PORT = process.env.PORT || 8000;
+const http = createServer(app)
 app.set("trust proxy", true);
 
 // app.use(cookieParser());
@@ -22,6 +24,19 @@ app.use(
         // allowedHeaders: ["Content-Type", "Authorization"],
     })
 )
+const io = new Server(http, {
+    cors: {
+        origin: 'http://localhost:3000',  
+        methods: ['GET', 'POST'],         
+        allowedHeaders: ['Content-Type'],
+        credentials: true                 
+    }
+})
+
+app.use((req: any, res: any, next: any) => {
+    req.io = io
+    next()
+})
 
 var dir = path.join(__dirname, 'static');
 app.use(express.static(dir));
@@ -29,10 +44,11 @@ app.use(express.static(dir));
 var uploadsDir = path.join(__dirname, 'uploads')
 app.use('/uploads', express.static(uploadsDir));
 
+// Connection to database 
 connectDB()
 
 app.get("/", (req: any, res: any) => {
-    res.send("hello world");
+    res.send("Hello world entry point")
 });
 
 app.use("/api/admin", checkValidAdminRole,  admin)
@@ -40,4 +56,4 @@ app.use("/api/therapist", therapist)
 app.use("/api/client", client)
 
 
-app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
+http.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
