@@ -86,7 +86,7 @@ export const getClientsService = async (payload: any) => {
     const totalDataCount = Object.keys(query).length < 1 ? await clientModel.countDocuments() : await clientModel.countDocuments(query)
     const clients = await clientModel.find(query).sort(sort).skip(offset).limit(limit)
     if (clients.length) {
-        // Fetch appointments for the retrieved clients
+        // Fetch clients
         const clientAppointments = await appointmentRequestModel.find({
             clientId: { $in: clients.map(c => c._id) }
         }).sort({ appointmentDate: -1 });
