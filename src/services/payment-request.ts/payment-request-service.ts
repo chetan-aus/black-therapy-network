@@ -4,6 +4,42 @@ import { Response } from "express";
 import { errorResponseHandler } from "../../lib/errors/error-response-handler";
 import { paymentRequestRejectedEmail } from "../../utils/mails/mail";
 
+export const getAllPaymentRequestsService = async (payload: any) => {
+    const page = parseInt(payload.page as string) || 1;
+    const limit = parseInt(payload.limit as string) || 10;
+    const offset = (page - 1) * limit;
+    const { query, sort } = queryBuilder(payload)
+
+    const totalDataCount = Object.keys(query).length < 1 ? await paymentRequestModel.countDocuments() : await paymentRequestModel.countDocuments(query)
+    const result = await paymentRequestModel.find(query).sort(sort).skip(offset).limit(limit).populate([
+        {
+            path: 'therapistId',
+            select: 'firstName lastName',
+        },
+        {
+            path: 'clientId',
+            select: 'firstName lastName',
+        }
+    ])
+
+    if (result.length) return {
+        success: true,
+        page,
+        limit,
+        total: totalDataCount,
+        data: result
+    }
+    else {
+        return {
+            data: [],
+            page,
+            limit,
+            success: false,
+            total: 0
+        }
+    }
+}
+
 export const addPaymentRequestService = async (payload: any) => {
     const newPaymentRequest = new paymentRequestModel(payload)
     const result = await newPaymentRequest.save()
@@ -70,41 +106,5 @@ export const updatePaymentRequestStatusService = async (payload: any, res: Respo
         success: true,
         message: "Payment request status updated successfully",
         data: result
-    }
-}
-
-export const getAllPaymentRequestsService = async (payload: any) => {
-    const page = parseInt(payload.page as string) || 1;
-    const limit = parseInt(payload.limit as string) || 10;
-    const offset = (page - 1) * limit;
-    const { query, sort } = queryBuilder(payload)
-
-    const totalDataCount = Object.keys(query).length < 1 ? await paymentRequestModel.countDocuments() : await paymentRequestModel.countDocuments(query)
-    const result = await paymentRequestModel.find(query).sort(sort).skip(offset).limit(limit).populate([
-        {
-            path: 'therapistId',
-            select: 'firstName lastName',
-        },
-        {
-            path: 'clientId',
-            select: 'firstName lastName',
-        }
-    ])
-
-    if (result.length) return {
-        success: true,
-        page,
-        limit,
-        total: totalDataCount,
-        data: result
-    }
-    else {
-        return {
-            data: [],
-            page,
-            limit,
-            success: false,
-            total: 0
-        }
     }
 }

@@ -1,11 +1,21 @@
 import { Request, Response } from "express";
 import { httpStatusCode } from "../../lib/constant";
 import { errorParser } from "../../lib/errors/error-response-handler";
-import { getAppointmentsService, requestAppointmentService, updateAppointmentStatusService, getClientAppointmentsService } from "../../services/appointments/appointments";
+import { getAppointmentsService, requestAppointmentService, updateAppointmentStatusService, getClientAppointmentsService, getAppointmentsByTherapistIdService } from "../../services/appointments/appointments";
 
-export const getAppointments = async (req:Request, res: Response) => {
+export const getAppointments = async (req: Request, res: Response) => {
     try {
         const response = await getAppointmentsService(req.query)
+        return res.status(200).json(response)
+    } catch (error: any) {
+        const { code, message } = errorParser(error)
+        return res.status(code || httpStatusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: message || "An error occurred" });
+    }
+}
+
+export const getAppointmentsByTherapistId = async (req: Request, res: Response) => {
+    try {
+        const response = await getAppointmentsByTherapistIdService({ id: req.params.id, ...req.query }, res)
         return res.status(200).json(response)
     } catch (error: any) {
         const { code, message } = errorParser(error)

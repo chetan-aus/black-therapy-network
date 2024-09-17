@@ -38,6 +38,38 @@ export const getAppointmentsService = async (payload: any) => {
     }
 }
 
+export const getAppointmentsByTherapistIdService = async (payload: any, res: Response) => {
+    const { id } = payload
+    const page = parseInt(payload.page as string) || 1
+    const limit = parseInt(payload.limit as string) || 10
+    const offset = (page - 1) * limit
+    const { query, sort } = queryBuilder(payload)
+    const queryForTherapistAppointments = {
+        $or: [
+            { therapistId: { $eq: id } },
+            { peerSupportIds: { $in: [id] } }
+        ]
+    }
+    const totalDataCount = Object.keys(query).length < 1 ? await appointmentRequestModel.countDocuments(queryForTherapistAppointments) : await appointmentRequestModel.countDocuments({ ...queryForTherapistAppointments, ...query })
+    const result = await appointmentRequestModel.find({ ...queryForTherapistAppointments, ...query }).sort(sort).skip(offset).limit(limit)
+    if (result.length) return {
+        data: result,
+        page,   
+        limit,
+        success: true,
+        total: totalDataCount
+    }
+    else {
+        return {
+            data: [],
+            page,
+            limit,
+            success: false,
+            total: 0
+        }
+    }
+}
+
 export const requestAppointmentService = async (payload: any, res: Response) => {
     const { clientId } = payload
     const client = await clientModel.findById(clientId)
@@ -63,7 +95,7 @@ export const updateAppointmentStatusService = async (payload: any, res: Response
 
     const hasClientSubscribedToService = client.serviceSubscribed
     if (!hasClientSubscribedToService) return errorResponseHandler("Client not subscribed to any service", httpStatusCode.BAD_REQUEST, res)
-        
+
     const updatedAppointmentRequest = await appointmentRequestModel.findByIdAndUpdate(id, { ...restPayload }, { new: true })
     return {
         success: true,
