@@ -19,7 +19,7 @@ import { checkMulter } from "../lib/errors/error-response-handler"
 import { addWellness, deleteWellness, getWellness } from "../controllers/admin/wellness"
 import { addUser, deleteUser, getUsers } from "../controllers/admin/user"
 import { getAppointments, updateAppointmentStatus } from "../controllers/appointments/appointments";
-import { getAllPaymentRequests } from "../controllers/payment-request/payment-request";
+import { getAllPaymentRequests, updatePaymentRequestStatus } from "../controllers/payment-request/payment-request";
 
 const router = Router();
 
@@ -41,7 +41,7 @@ router.route("/users").get(getUsers).post(addUser)
 router.delete("/users/:id", deleteUser)
 
 router.get("/payment-requests", getAllPaymentRequests)
-
+router.patch("/payment-requests/:id", updatePaymentRequestStatus)
 // router.get("/verify-session", verifySession);
 // router.patch("/update-password", passwordReset)
 // router.patch("/forgot-password", forgotPassword)

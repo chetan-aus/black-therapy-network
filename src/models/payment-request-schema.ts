@@ -6,6 +6,10 @@ const paymentRequestSchema = new mongoose.Schema({
         enum: ["pending", "approved", "rejected"],
         default: "pending"
     },
+    statusChangedBy: {
+        type: String,
+        enum: ['admin', 'QP, OD']
+    },
     requestType: {
         type: String,
         required: true
