@@ -52,6 +52,10 @@ const therapistSchema = new mongoose.Schema({
             "Pending Termination",
         ], 
     },
+    isOnline: {
+        type: Boolean,
+        default: false
+    },
 
 },
     { timestamps: true }
