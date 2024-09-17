@@ -3,10 +3,11 @@ import cors from "cors";
 // import cookieParser from "cookie-parser";
 import path from "path";
 import connectDB from "./configF/db";
-import { admin, client, therapist } from "./routes";
+import { admin, chats, client, therapist } from "./routes";
 import { checkValidAdminRole } from "./utils";
 import { createServer } from 'http';
 import { Server } from "socket.io";
+import socketHandler from "./configF/socket";
 
 const PORT = process.env.PORT || 8000
 const app = express()
@@ -47,6 +48,8 @@ app.use('/uploads', express.static(uploadsDir));
 // Connection to database 
 connectDB()
 
+//IO Connection
+socketHandler(io)
 app.get("/", (req: any, res: any) => {
     res.send("Hello world entry point")
 });
@@ -54,6 +57,6 @@ app.get("/", (req: any, res: any) => {
 app.use("/api/admin", checkValidAdminRole,  admin)
 app.use("/api/therapist", therapist)
 app.use("/api/client", client)
-
+app.use("/api/chats", chats)
 
 http.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
