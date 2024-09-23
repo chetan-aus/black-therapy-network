@@ -8,6 +8,8 @@ import { onboardingApplicationModel } from "../../models/therapist/onboarding-ap
 import { queryBuilder } from "../../utils";
 import { clientModel } from "../../models/client/clients-schema";
 import { appointmentRequestModel } from "../../models/appointment-request-schema";
+import { billingModel } from "../../models/client/billing-schema";
+import { serviceAssignmentModel } from "../../models/client/service-assignment-schema";
 // import { passswordResetSchema, testMongoIdSchema } from "../../validation/admin-user";
 // import { generatePasswordResetToken, getPasswordResetTokenByToken } from "../../lib/send-mail/tokens";
 // import { sendPasswordResetEmail } from "../../lib/send-mail/mail";
@@ -129,19 +131,60 @@ export const getClientsService = async (payload: any) => {
     }
 }
 
+export const getAClientService = async (id: string, res: Response) => {
+    const client = await clientModel.findById(id)
+    if (!client) return errorResponseHandler("Client not found", httpStatusCode.NOT_FOUND, res)
+    return { success: true, data: client }
+}
+
 export const deleteClientService = async (id: string, res: Response) => {
     const client = await clientModel.findByIdAndDelete(id)
     if (!client) return errorResponseHandler("Client not found", httpStatusCode.NOT_FOUND, res)
     return { success: true, message: "Client deleted successfully" }
 }
 
-export const updateClientStatusService = async (id: string, res: Response) => {
+export const updateClientService = async (payload: any, res: Response) => {
+    const { id, ...rest } = payload
     const client = await clientModel.findById(id)
     if (!client) return errorResponseHandler("Client not found", httpStatusCode.NOT_FOUND, res)
-    client.status = !client.status
-    await client.save()
-    return { success: true, message: "Client status updated successfully" }
+    const updatedClient = await clientModel.findByIdAndUpdate(id, rest, { new: true })
+    return { success: true, message: "Client status updated successfully", data: updatedClient }
 }
+
+export const addClientBillingService = async (payload: any, res: Response) => {
+    const { id, ...rest } = payload
+    const newPayload = { ...rest, clientId: id }
+    const client = await clientModel.findById(id)
+    if (!client) return errorResponseHandler("Client not found", httpStatusCode.NOT_FOUND, res)
+    const newBilling = new billingModel(newPayload)
+    await newBilling.save()
+    return { success: true, message: "Client billing added successfully", data: newBilling }
+}
+
+export const getClientBillingService = async (id: string, res: Response) => {
+    const client = await clientModel.findById(id)
+    if (!client) return errorResponseHandler("Client not found", httpStatusCode.NOT_FOUND, res)
+    const clientBillings = await billingModel.find({ clientId: id })
+    return { success: true, data: clientBillings, message: "Client billings fetched successfully" }
+}
+
+export const addClientServiceAssignmentService = async (payload: any, res: Response) => {
+    const { id, ...rest } = payload
+    const newPayload = { ...rest, clientId: id }
+    const client = await clientModel.findById(id)
+    if (!client) return errorResponseHandler("Client not found", httpStatusCode.NOT_FOUND, res)
+    const newServiceAssignment = new serviceAssignmentModel(newPayload)
+    await newServiceAssignment.save()
+    return { success: true, message: "Client service assignment added successfully", data: newServiceAssignment }
+}
+
+export const getClientServiceAssignmentService = async (id: string, res: Response) => {
+    const client = await clientModel.findById(id)
+    if (!client) return errorResponseHandler("Client not found", httpStatusCode.NOT_FOUND, res)
+    const clientServiceAssignments = await serviceAssignmentModel.find({ clientId: id })
+    return { success: true, message: "Client service assignments fetched successfully", data: clientServiceAssignments }
+}
+//make same 2 apis like above and it will be for service assignments
 
 //Therapist Services
 export const getTherapistsService = async (payload: any) => {
@@ -158,36 +201,38 @@ export const getTherapistsService = async (payload: any) => {
 
         const appointments = await appointmentRequestModel.find({
             $or: [
-                { therapistId: { $in: therapistIds } },
+                { therapistId: { $eq: therapistIds } },
                 { peerSupportIds: { $in: therapistIds } }
             ]
         }).sort({ appointmentDate: -1 });
 
         const appointmentMap = appointments.reduce((map: any, appointment: any) => {
-            const therapistId = appointment.therapistId
+            const therapistId = appointment.therapistId.toString()
             const addAppointmentToMap = (id: any) => {
-                if (!map[id.toString()]) {
-                    map[id.toString()] = [];
+                if (!map[id]) {
+                    map[id] = []
                 }
-                map[id.toString()].push(appointment);
+                map[id].push(appointment)
             };
 
-            addAppointmentToMap(therapistId);
-            appointment.peerSupportIds.forEach(addAppointmentToMap);
-            return map;
+            addAppointmentToMap(therapistId)
+            appointment.peerSupportIds.forEach((id: any) => addAppointmentToMap(id.toString()))
+            return map
         }, {});
 
         const therapistsWithAppointments = therapists.map(therapist => {
-            const therapistObject = therapist.toObject() as any
-            therapistObject.appointments = appointmentMap[therapist._id.toString()] || [];
+            const therapistObject = therapist.toObject() as any;
+            const therapistIdStr = therapist._id.toString();
+            therapistObject.appointments = appointmentMap[therapistIdStr] || [];
             return therapistObject;
-        })
+        });
+
         return {
-            data: therapistsWithAppointments,
             page,
             limit,
             success: true,
-            total: totalDataCount
+            total: totalDataCount,
+            data: therapistsWithAppointments
         }
     }
     else {

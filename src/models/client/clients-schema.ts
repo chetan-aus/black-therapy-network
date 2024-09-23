@@ -14,7 +14,7 @@ const clientSchema = new mongoose.Schema({
     insuranceCoverage: {
         type: String,
         enum: ['yes', 'no', 'through EAP'],
-        required: true
+        // required: true
     },
     insuranceCompany: {
         type: {
@@ -35,29 +35,29 @@ const clientSchema = new mongoose.Schema({
     },
     reasonForLookingHelp: {
         type: String,
-        required: true
+        // required: true
     },
     rateSleepingHabits: {
         type: String,
         enum: ['Excellent', 'Good', 'Fair', 'Poor'],
-        required: true
+        // required: true
     },
     rateCurrentPhysicalHealth: {
         type: String,
         enum: ['Excellent', 'Good', 'Fair', 'Poor'],
-        required: true
+        // required: true
     },
     howYouKnewUs: {
         type: String,
-        required: true
+        // required: true
     },
     gender: {
         type: String,
-        required: true
+        // required: true
     },
     mainIssueBrief: {
         type: String,
-        required: true
+        // required: true
     },
     firstName: {
         type: String,
@@ -69,7 +69,7 @@ const clientSchema = new mongoose.Schema({
     },
     dob: {
         type: Date,
-        required: true
+        // required: true
     },
     phoneNumber: {
         type: String,
@@ -87,23 +87,23 @@ const clientSchema = new mongoose.Schema({
     },
     state: {
         type: String,
-        required: true
+        // required: true
     },
     city: {
         type: String,
-        required: true
+        // required: true
     },
     zipCode: {
         type: String,
-        required: true
+        // required: true
     },
     addressLine1: {
         type: String,
-        reqired: true
+        // reqired: true
     },
      addressLine2: {
         type: String,
-        required: true
+        // required: true
     },
     status: {
         type: Boolean,

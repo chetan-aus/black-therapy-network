@@ -5,12 +5,18 @@ import {
     // verifySession,
     //  passwordReset, forgotPassword, newPassswordAfterEmailSent, 
     getDashboardStats,
+    getClientBillings,
+    addClientBilling,
     getClients,
     getTherapists,
     deleteClient,
     deleteTherapist,
-    updateClientStatus,
+    updateClient,
+    getAClient,
     updateTherapist,
+    addClientServiceAssignment,
+    getClientServiceAssignment
+
     //  updateDashboardStats
 } from "../controllers/admin/admin";
 // import { checkAdminAuth } from "../middleware/check-auth";
@@ -28,15 +34,29 @@ router.get("/dashboard", getDashboardStats)
 router.get("/appointments", getAppointments)
 router.patch("/appointments/:id", updateAppointmentStatus)
 
-router.get("/clients", getClients)
-router.route("/clients/:id").delete(deleteClient).patch(updateClientStatus)
 
+//Client
+router.get("/clients", getClients)
+router.route("/clients/:id").delete(deleteClient).patch(updateClient).get(getAClient)
+
+//Client billing
+router.route("/client-billing/:id").post(addClientBilling)
+router.route("/client-billing/:id").get(getClientBillings)
+
+// Client Service Assignment
+router.route("/client-service-assignment/:id").post(addClientServiceAssignment)
+router.route("/client-service-assignment/:id").get(getClientServiceAssignment)
+
+//Therapist
 router.get("/therapists", getTherapists)
 router.route("/therapists/:id").delete(deleteTherapist).put(updateTherapist)
 
+
+//Wellness
 router.route("/wellness").get(getWellness).post(addWellness)
 router.delete("/delete-wellness/:id", deleteWellness)
 
+//Users
 router.route("/users").get(getUsers).post(addUser)
 router.delete("/users/:id", deleteUser)
 
