@@ -1,23 +1,21 @@
-# Use the official Node.js image as the base image
+# Base image
 FROM node:18
 
 # Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and install dependencies
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Copy the rest of the application
 COPY . .
 
-# Build the TypeScript code
-RUN npm run build
+# Install pm2 globally
+RUN npm install pm2 -g
 
-# Expose the port the app runs on
+# Expose the application port
 EXPOSE 8000
 
-# Command to run the application
+# Start the application with pm2
 CMD ["pm2-runtime", "start", "app.js"]
