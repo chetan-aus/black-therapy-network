@@ -14,8 +14,11 @@ COPY . .
 # Install pm2 globally
 RUN npm install pm2 -g
 
+# Install ts-node globally
+RUN npm install -g ts-node typescript
+
 # Expose the application port
 EXPOSE 8000
 
-# Start the application with pm2
-CMD ["pm2-runtime", "start", "app.js"]
+# Start the application with pm2 using ts-node
+CMD ["pm2-runtime", "start", "src/app.ts", "--interpreter", "ts-node"]
