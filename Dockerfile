@@ -20,4 +20,4 @@ RUN npm run build
 EXPOSE 8000
 
 # Command to run the application
-CMD ["npm", "start"]
+CMD ["pm2-runtime", "start", "app.js"]
