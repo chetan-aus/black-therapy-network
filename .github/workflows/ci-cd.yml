@@ -59,7 +59,7 @@ jobs:
             # Run a new container with the pulled image
             # Optionally, clean up old unused Docker images
         run: |
-          ssh -o StrictHostKeyChecking=no mailto:ubuntu@ec2-13-201-78-137.ap-south-1.compute.amazonaws.com << 'EOF'
+          ssh -tt -o StrictHostKeyChecking=no mailto:ubuntu@ec2-13-201-78-137.ap-south-1.compute.amazonaws.com << 'EOF'
             docker pull ${{ secrets.DOCKER_USERNAME }}/backend:latest
 
             docker stop backend || true
