@@ -14,9 +14,6 @@ COPY . .
 # Install pm2 globally
 RUN npm install pm2 -g
 
-# Install ts-node globally
-RUN npm install -g ts-node typescript
-
 # Expose the application port
 EXPOSE 8000
 
